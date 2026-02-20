@@ -1,0 +1,16 @@
+{
+  "schema": "integrity_evidence.v1",
+  "subject": {
+    "type": "software_binary",
+    "name": "example.bin",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "verification": {
+    "method": "cryptographic_hash",
+    "result": "match",
+    "confidence": "cryptographic"
+  },
+  "timestamps": {
+    "observed_utc": "2026-02-19T00:00:00Z"
+  }
+}
