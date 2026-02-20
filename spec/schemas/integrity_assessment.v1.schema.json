@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "integrity_assessment.v1.schema.json",
+  "type": "object",
+  "required": ["schema", "bundle_id", "verifier", "analysis", "generated_utc"],
+  "properties": {
+    "schema": { "const": "integrity_assessment.v1" },
+    "bundle_id": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "verifier": { "type": "object" },
+    "analysis": {
+      "type": "object",
+      "required": ["model_id", "integrity_state", "findings"],
+      "properties": {
+        "model_id": { "type": "string" },
+        "integrity_state": { "type": "string" },
+        "confidence": { "type": "object" },
+        "findings": { "type": "array", "items": { "type": "object" } }
+      },
+      "additionalProperties": true
+    },
+    "generated_utc": { "type": "string" }
+  },
+  "additionalProperties": true
+}
