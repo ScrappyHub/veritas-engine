@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "verification_result.v1.schema.json",
+  "type": "object",
+  "required": ["schema", "bundle_id", "status", "checks", "verified_at_utc"],
+  "properties": {
+    "schema": { "const": "verification_result.v1" },
+    "bundle_id": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "status": {
+      "type": "string",
+      "enum": [
+        "VERIFIED",
+        "STRUCTURE_INVALID",
+        "MANIFEST_HASH_MISMATCH",
+        "FILE_HASH_MISMATCH",
+        "INVALID_SIGNATURE",
+        "SCHEMA_INVALID",
+        "BUNDLE_ID_INVALID"
+      ]
+    },
+    "checks": {
+      "type": "object",
+      "required": ["structure", "manifest", "hashes", "signatures", "schema"],
+      "properties": {
+        "structure": { "type": "boolean" },
+        "manifest": { "type": "boolean" },
+        "hashes": { "type": "boolean" },
+        "signatures": { "type": "boolean" },
+        "schema": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "errors": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "verified_at_utc": { "type": "string" }
+  },
+  "additionalProperties": false
+}
