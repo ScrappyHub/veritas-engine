@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "integrity_evidence.v1.schema.json",
+  "type": "object",
+  "required": ["schema", "subject", "verification", "timestamps"],
+  "properties": {
+    "schema": { "const": "integrity_evidence.v1" },
+    "subject": {
+      "type": "object",
+      "required": ["type", "name", "sha256"],
+      "properties": {
+        "type": { "type": "string" },
+        "name": { "type": "string" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      },
+      "additionalProperties": true
+    },
+    "verification": {
+      "type": "object",
+      "required": ["method", "result", "confidence"],
+      "properties": {
+        "method": { "type": "string" },
+        "result": { "type": "string" },
+        "confidence": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "timestamps": {
+      "type": "object",
+      "required": ["observed_utc"],
+      "properties": {
+        "observed_utc": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
