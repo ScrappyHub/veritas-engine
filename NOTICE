@@ -1,0 +1,9 @@
+Veritas Engine — AI-Centered Verifiable Integrity Infrastructure
+
+This repository contains:
+- Open integrity evidence specifications
+- Deterministic reference verification requirements
+- Downstream AI integrity analysis requirements
+
+Cryptographic verification is authoritative.
+AI outputs are analysis-only and must reference verifiable evidence.
