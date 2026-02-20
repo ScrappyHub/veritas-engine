@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "analysis_input.v1.schema.json",
+  "type": "object",
+  "required": ["schema", "bundle_id", "verifier", "evidence", "provenance_index", "file_index"],
+  "properties": {
+    "schema": { "const": "analysis_input.v1" },
+    "bundle_id": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "verifier": { "type": "object" },
+    "evidence": { "type": "object" },
+    "provenance_index": { "type": "object" },
+    "file_index": { "type": "array", "items": { "type": "object" } }
+  },
+  "additionalProperties": true
+}
