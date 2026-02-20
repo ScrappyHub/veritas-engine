@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "manifest.v1.schema.json",
+  "type": "object",
+  "required": ["format", "bundle_id", "created_utc", "hash_algorithm", "files"],
+  "properties": {
+    "format": { "const": "integrity_evidence_bundle.v1" },
+    "bundle_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "created_utc": { "type": "string" },
+    "hash_algorithm": { "const": "sha256" },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
