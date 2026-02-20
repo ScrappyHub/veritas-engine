@@ -1,0 +1,21 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verifier_vectors:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Repo sanity
+        run: |
+          test -f spec/README.md
+          test -d test_vectors
+
+      - name: Note
+        run: |
+          echo "CI scaffold: implement verifier/normalizer/analyzer runners, then enable vector verification."
