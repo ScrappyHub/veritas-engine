@@ -1,0 +1,13 @@
+Veritas: deterministic verification engine Tier-0 complete
+
+- positive suite deterministic PASS
+- negative suite deterministic FAIL token-validated
+- receipt ledger and schema implemented
+- stdout discipline enforced
+- final aggregate runner added
+
+Entry point:
+scripts/_RUN_VERITAS_TIER0_FULL_GREEN_v1.ps1
+
+Success token:
+VERITAS_TIER0_FULL_GREEN_OK

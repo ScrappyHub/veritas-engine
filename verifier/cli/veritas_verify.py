@@ -14,6 +14,12 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path as _Path
+sys.path.insert(0, str(_Path(__file__).resolve().parents[2]))
+
+
+
 import argparse
 import base64
 import hashlib
@@ -34,6 +40,8 @@ except Exception:  # pragma: no cover
     Ed25519PublicKey = None
 
 
+DETERMINISTIC_UTC = '2026-02-19T00:00:00Z'
+
 STATUSES = [
     "VERIFIED",
     "STRUCTURE_INVALID",
@@ -45,10 +53,10 @@ STATUSES = [
 ]
 
 
-def utc_now_iso() -> str:
+def utc_now_iso(deterministic: bool) -> str:
+    if deterministic:
+        return DETERMINISTIC_UTC
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
 def sha256_hex_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
@@ -123,14 +131,14 @@ def schema_check_evidence(obj: Any) -> bool:
     return True
 
 
-def build_result(bundle_id: str, status: str, checks: Dict[str, bool], errors: List[str]) -> Dict[str, Any]:
+def build_result(bundle_id: str, status: str, checks: Dict[str, bool], errors: List[str], deterministic: bool) -> Dict[str, Any]:
     return {
         "schema": "verification_result.v1",
         "bundle_id": bundle_id,
         "status": status,
         "checks": checks,
         "errors": errors,
-        "verified_at_utc": utc_now_iso(),
+        "verified_at_utc": utc_now_iso(deterministic),
     }
 
 
@@ -141,6 +149,7 @@ def main() -> int:
     vp = sub.add_parser("verify")
     vp.add_argument("bundle_path")
     vp.add_argument("--json", action="store_true", help="Emit JSON only")
+    vp.add_argument("--deterministic", action="store_true", help="Deterministic verified_at_utc for test vectors")
     vp.add_argument(
         "--pubkey",
         default=str(Path("test_vectors/keys/test_signer_ed25519.pub")),
@@ -148,6 +157,7 @@ def main() -> int:
     )
 
     args = ap.parse_args()
+    deterministic = bool(getattr(args, "deterministic", False))
     if args.cmd != "verify":
         raise SystemExit(2)
 
@@ -176,7 +186,7 @@ def main() -> int:
     if missing:
         bundle_id = "sha256:" + ("0" * 64)
         errors.append("STRUCTURE_MISSING: " + "; ".join(missing))
-        out = build_result(bundle_id, "STRUCTURE_INVALID", checks, errors)
+        out = build_result(bundle_id, "STRUCTURE_INVALID", checks, errors, deterministic)
         print(json.dumps(out, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
         return 1
     checks["structure"] = True
@@ -187,20 +197,24 @@ def main() -> int:
     except Exception as e:
         bundle_id = "sha256:" + ("0" * 64)
         errors.append(f"MANIFEST_PARSE_FAIL: {e}")
-        out = build_result(bundle_id, "STRUCTURE_INVALID", checks, errors)
+        out = build_result(bundle_id, "STRUCTURE_INVALID", checks, errors, deterministic)
         print(json.dumps(out, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
         return 1
 
     # Step 2: Canonical manifest hash verification + bundle_id
     try:
         canon_m = canon_bytes(manifest)
-        computed_bundle_id = "sha256:" + sha256_hex_bytes(canon_m)
+        zero_manifest = dict(manifest)
+        zero_manifest["bundle_id"] = "sha256:" + ("0" * 64)
+        canon_m0 = canon_bytes(zero_manifest)
+        computed_bundle_id = "sha256:" + sha256_hex_bytes(canon_m0)
+        canon_m = canon_bytes(manifest)
         declared_bundle_id = str(manifest.get("bundle_id", ""))
         if declared_bundle_id != computed_bundle_id:
             errors.append(f"BUNDLE_ID_MISMATCH: declared={declared_bundle_id} computed={computed_bundle_id}")
             # We still continue to produce a stable output referencing computed id for diagnosis.
             bundle_id = computed_bundle_id
-            out = build_result(bundle_id, "BUNDLE_ID_INVALID", checks, errors)
+            out = build_result(bundle_id, "BUNDLE_ID_INVALID", checks, errors, deterministic)
             print(json.dumps(out, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
             return 1
         checks["manifest"] = True
@@ -208,7 +222,7 @@ def main() -> int:
     except Exception as e:
         bundle_id = "sha256:" + ("0" * 64)
         errors.append(f"MANIFEST_HASH_FAIL: {e}")
-        out = build_result(bundle_id, "MANIFEST_HASH_MISMATCH", checks, errors)
+        out = build_result(bundle_id, "MANIFEST_HASH_MISMATCH", checks, errors, deterministic)
         print(json.dumps(out, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
         return 1
 
@@ -248,7 +262,7 @@ def main() -> int:
     except Exception as e:
         if not any(err.startswith("FILE_HASH_BAD") or err.startswith("MISSING_HASHED_FILE") for err in errors):
             errors.append(f"HASHES_CHECK_FAIL: {e}")
-        out = build_result(bundle_id, "FILE_HASH_MISMATCH", checks, errors)
+        out = build_result(bundle_id, "FILE_HASH_MISMATCH", checks, errors, deterministic)
         print(json.dumps(out, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
         return 1
 
@@ -267,7 +281,7 @@ def main() -> int:
         checks["signatures"] = True
     except Exception as e:
         errors.append(f"SIGNATURE_INVALID: {e}")
-        out = build_result(bundle_id, "INVALID_SIGNATURE", checks, errors)
+        out = build_result(bundle_id, "INVALID_SIGNATURE", checks, errors, deterministic)
         print(json.dumps(out, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
         return 1
 
@@ -279,11 +293,11 @@ def main() -> int:
         checks["schema"] = True
     except Exception as e:
         errors.append(f"SCHEMA_INVALID: {e}")
-        out = build_result(bundle_id, "SCHEMA_INVALID", checks, errors)
+        out = build_result(bundle_id, "SCHEMA_INVALID", checks, errors, deterministic)
         print(json.dumps(out, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
         return 1
 
-    out = build_result(bundle_id, "VERIFIED", checks, errors)
+    out = build_result(bundle_id, "VERIFIED", checks, errors, deterministic)
     print(json.dumps(out, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
     return 0
 

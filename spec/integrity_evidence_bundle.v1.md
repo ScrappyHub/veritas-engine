@@ -15,6 +15,10 @@ A deterministic directory-bundle containing integrity evidence that can be indep
 - `artifacts/`
 
 ## Bundle Identity Rule
+
+v1 Canonical rule (non-self-referential):
+bundle_id = sha256(canonical_bytes(manifest.json) after setting manifest.bundle_id to sha256:00..00)
+
 `bundle_id = sha256(canonical_bytes(manifest.json))`
 
 `manifest.json` MUST include:

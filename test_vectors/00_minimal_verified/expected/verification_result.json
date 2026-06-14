@@ -1,16 +1,1 @@
-{
-  "schema": "verification_result.v1",
-  "bundle_id": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-  "status": "STRUCTURE_INVALID",
-  "checks": {
-    "structure": false,
-    "manifest": false,
-    "hashes": false,
-    "signatures": false,
-    "schema": false
-  },
-  "errors": [
-    "PLACEHOLDER_VECTOR: compute real hashes, bundle_id, and signatures; then update expected output to VERIFIED"
-  ],
-  "verified_at_utc": "2026-02-19T00:00:00Z"
-}
+{"bundle_id":"sha256:ed8db09d6bdf751287b05c7b4ce5e44d8e464728555a59c7bea107c377b1709e","checks":{"hashes":true,"manifest":true,"schema":true,"signatures":true,"structure":true},"errors":[],"schema":"verification_result.v1","status":"VERIFIED","verified_at_utc":"2026-02-19T00:00:00Z"}

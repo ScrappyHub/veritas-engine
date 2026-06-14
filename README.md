@@ -1,49 +1,66 @@
 # Veritas Engine
-AI-Centered Verifiable Integrity Infrastructure
 
-Veritas Engine is an integrity verification and analysis infrastructure designed to enable independent validation of software, digital artifacts, and integrity claims.
+AI-centered verifiable integrity infrastructure.
 
-## Core Law (Non-Negotiable)
-**Cryptographic verification establishes truth.**
-**AI performs analysis strictly downstream of verified truth.**
-AI must never mutate evidence bundles or override verifier results.
+## Veritas - Deterministic Verification Engine
 
-## What Veritas Engine Produces
-1) **Deterministic Verification Results** (non-AI, independently reproducible)
-2) **AI Integrity Assessments** (analysis-only, evidence-linked, independently checkable)
+### Quick Start (Tier-0)
 
-## Repository Planes
-### Plane A — Deterministic Verification Plane (Truth)
-- Integrity Evidence Bundle (IEB)
-- Reference Verifier (non-AI)
-- Deterministic `verification_result.v1.json`
+Run the full deterministic verification suite:
 
-### Plane B — AI Integrity Analysis Plane (Interpretation)
-- Deterministic Normalizer produces `analysis_input.v1.json`
-- AI Analyzer produces `integrity_assessment.v1.json`
-- Findings must cite evidence fields/files/hashes
-- AI cannot claim VERIFIED if verifier is not VERIFIED
+```powershell
+powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass `
+  -File "C:\dev\veritas-engine\scripts\_RUN_VERITAS_TIER0_FULL_GREEN_v1.ps1" `
+  -RepoRoot "C:\dev\veritas-engine"
+```
 
-## Directory Layout
-- `spec/` — Canonical specifications + schemas (authoritative)
-- `verifier/` — Reference verifier (deterministic, non-AI, offline)
-- `normalizer/` — Deterministic bridge: bundle+verifier → analysis_input
-- `analyzer/` — AI analysis engine (downstream-only)
-- `test_vectors/` — Deterministic convergence vectors + expected outputs
-- `tools/` — Optional helper scripts (canonical JSON, signing, vector runner)
+### Expected Output
 
-## Quick Start (Conceptual)
-1) Verify a bundle:
-   - `veritas-verify verify <bundle_path> --json > verification_result.json`
-2) Normalize for AI:
-   - `veritas-normalize normalize <bundle_path> <verification_result.json> --json > analysis_input.json`
-3) Analyze:
-   - `veritas-analyze analyze <analysis_input.json> --json > integrity_assessment.json`
+```text
+VERITAS_TIER0_FULL_GREEN_OK
+```
 
-## Status
-This repository is a canonical v1 scaffold. Implementations must conform to:
-- Integrity Evidence Bundle v1
-- Reference Verifier Toolchain Spec v1
-- Architecture Spec v1
+### What This Proves
 
-See `spec/` and `test_vectors/`.
+- All positive verification paths
+- All negative failure cases
+- Deterministic stdout behavior with no noise
+- Receipt emission integrity
+- Parse-gated execution of all runners
+
+### Core Runners
+
+```text
+scripts/_RUN_veritas_all_selftests_v1.ps1
+scripts/_RUN_veritas_all_selftests_with_receipts_v1.ps1
+scripts/_RUN_veritas_negative_suite_v1.ps1
+scripts/_RUN_VERITAS_TIER0_FULL_GREEN_v1.ps1
+```
+
+### Negative Coverage
+
+```text
+test_vectors/negative/01_tampered_file
+test_vectors/negative/02_missing_file
+test_vectors/negative/03_missing_manifest
+```
+
+### Receipts
+
+```text
+proofs/receipts/veritas.ndjson
+```
+
+Schema:
+
+```text
+schemas/veritas.receipt.v1.json
+```
+
+### Determinism Contract
+
+- UTF-8 no BOM, LF line endings
+- No interactive input
+- Parse-gated scripts only
+- Stable success tokens
+- Append-only receipt ledger
